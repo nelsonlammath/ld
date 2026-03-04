@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨機選名單 · 33位</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(145deg, #f0f4fa 0%, #d9e2ef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .card {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0,10,30,0.2), 0 6px 12px rgba(0,0,0,0.1);
+            width: min(650px, 100%);
+            padding: 2.5rem 2rem 2.8rem;
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: all 0.2s;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: #0b1f33;
+            margin: 0 0 0.35rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        h1 span {
+            background: #1e3a5f;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            line-height: 1.5;
+            margin-left: 0.5rem;
+        }
+        .subhead {
+            color: #2c405c;
+            font-size: 1rem;
+            font-weight: 400;
+            margin-top: 0.2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #5e7fa3;
+            padding-left: 1rem;
+            background: rgba(255,255,255,0.3);
+            border-radius: 0 8px 8px 0;
+        }
+        .name-panel {
+            background: #f9fcff;
+            border-radius: 2rem;
+            padding: 1.8rem 1.5rem;
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.02), 0 6px 12px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.9);
+        }
+        .picked-area {
+            background: #ffffffd6;
+            border-radius: 1.8rem;
+            padding: 2rem 1rem;
+            margin-bottom: 1.8rem;
+            text-align: center;
+            border: 2px dashed #a0b8d0;
+            transition: background 0.15s;
+        }
+        .picked-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #486581;
+            font-weight: 500;
+        }
+        #displayName {
+            font-size: 3.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #0a2647;
+            margin: 0.25rem 0 0.2rem;
+            word-break: break-word;
+        }
+        .number-badge {
+            display: inline-block;
+            background: #b6c9e0;
+            color: #102a41;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.3rem 1.2rem;
+            border-radius: 60px;
+            margin-top: 0.2rem;
+            border: 1px solid white;
+        }
+        .action-row {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0 1.2rem;
+        }
+        .pick-btn {
+            background: #1e3a5f;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 600;
+            padding: 1.2rem 3rem;
+            border-radius: 3rem;
+            box-shadow: 0 10px 20px -5px rgba(15, 30, 60, 0.5);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 2px solid #ffffff70;
+            width: 100%;
+            max-width: 380px;
+            letter-spacing: 1px;
+        }
+        .pick-btn:hover {
+            background: #244b78;
+            transform: scale(1.02);
+            box-shadow: 0 16px 28px -6px #0b1e33;
+        }
+        .pick-btn:active {
+            background: #163250;
+            transform: scale(0.98);
+            box-shadow: 0 6px 12px -3px #0f1f30;
+        }
+        .pick-btn:focus-visible {
+            outline: 3px solid #f4c542;
+            outline-offset: 3px;
+        }
+        .list-toggle {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0 0.8rem;
+        }
+        .toggle-btn {
+            background: none;
+            border: 2px solid #9bb1ca;
+            color: #1c3a5c;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(2px);
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toggle-btn:hover {
+            background: #d2e1f5;
+            border-color: #6b8bb0;
+        }
+        .names-container {
+            background: #eef4fc;
+            border-radius: 1.8rem;
+            padding: 0.2rem 1.2rem 0.5rem;
+            margin-top: 1.8rem;
+            border: 1px solid #c2d6ec;
+            transition: 0.2s;
+        }
+        .names-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem 0.75rem;
+            justify-content: center;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 0.8rem 0.2rem 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: #9eb9d3 #dbe7f3;
+        }
+        .names-grid::-webkit-scrollbar {
+            width: 7px;
+        }
+        .names-grid::-webkit-scrollbar-track {
+            background: #dbe7f3;
+            border-radius: 10px;
+        }
+        .names-grid::-webkit-scrollbar-thumb {
+            background: #9eb9d3;
+            border-radius: 10px;
+        }
+        .name-chip {
+            background: white;
+            border-radius: 40px;
+            padding: 0.4rem 1rem 0.4rem 1.2rem;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            border: 1px solid #b8cee7;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 6px;
+            transition: 0.05s;
+        }
+        .name-chip .num {
+            font-weight: 700;
+            color: #264e7b;
+            background: #dde9f8;
+            border-radius: 30px;
+            padding: 0.1rem 0.55rem;
+            font-size: 0.75rem;
+            margin-left: 0.2rem;
+        }
+        .footer-note {
+            font-size: 0.8rem;
+            color: #406684;
+            text-align: center;
+            margin-top: 1.7rem;
+            opacity: 0.7;
+        }
+        .collapsed {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>
+            🎲 幸運抽選
+            <span>33</span>
+        </h1>
+        <div class="subhead">名單 · 一鍵隨機選取</div>
+
+        <div class="name-panel">
+            <!-- 抽選結果顯示區 -->
+            <div class="picked-area" id="pickedArea">
+                <div class="picked-label">本次抽中</div>
+                <div id="displayName">✨ 準備就緒</div>
+                <div class="number-badge" id="displayNumber">編號 -</div>
+            </div>
+
+            <!-- 主要抽選按鈕 -->
+            <div class="action-row">
+                <button class="pick-btn" id="pickRandomBtn">
+                    <span>🎯</span> 點擊隨機選名 <span>🔁</span>
+                </button>
+            </div>
+
+            <!-- 展開/隱藏名單 (美觀用) -->
+            <div class="list-toggle">
+                <button class="toggle-btn" id="toggleListBtn" type="button">📋 顯示全部名單</button>
+            </div>
+
+            <!-- 名單容器 (預設隱藏，點擊展開) -->
+            <div id="fullListContainer" class="names-container collapsed">
+                <div class="names-grid" id="namesGrid"></div>
+            </div>
+        </div>
+        <div class="footer-note">* 共33位，每次抽選獨立且隨機</div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 原始資料：姓名 + 號碼 (照原始順序，但顯示時可保留數字) ----------
+            const nameList = [
+                { name: "歐叡甄", number: 1 },
+                { name: "陳芷萱", number: 2 },
+                { name: "鄭湣芝", number: 3 },
+                { name: "鄭詩蕊", number: 4 },
+                { name: "張文淵", number: 5 },
+                { name: "黃瑞妍", number: 6 },
+                { name: "洪學敏", number: 7 },
+                { name: "李汶靜", number: 8 },
+                { name: "梁梓彤", number: 9 },
+                { name: "李雅欣", number: 10 },
+                { name: "林倩瑜", number: 11 },
+                { name: "馬凱盈", number: 12 },
+                { name: "吳彥逸", number: 13 },
+                { name: "余婧瑤", number: 14 },
+                { name: "陳頌奇", number: 15 },
+                { name: "陳梓朗", number: 16 },
+                { name: "庄信南", number: 17 },
+                { name: "黃哲麟", number: 18 },
+                { name: "高唯峻", number: 19 },
+                { name: "官頌朗", number: 20 },
+                { name: "林偉誠", number: 21 },
+                { name: "李浚哲", number: 22 },
+                { name: "梁翰升", number: 23 },
+                { name: "林錦檳", number: 24 },
+                { name: "曾柏喬", number: 25 },
+                { name: "謝佑崇", number: 26 },
+                { name: "曹梓然", number: 27 },
+                { name: "黃晉逸", number: 28 },
+                { name: "黃啟博", number: 29 },
+                { name: "肖全凱", number: 30 },
+                { name: "葉咏天", number: 31 },
+                { name: "俞君來", number: 32 },
+                { name: "鄭瑋駿", number: 33 }
+            ];
+
+            // DOM 元素
+            const displayNameEl = document.getElementById('displayName');
+            const displayNumberEl = document.getElementById('displayNumber');
+            const pickBtn = document.getElementById('pickRandomBtn');
+            const toggleBtn = document.getElementById('toggleListBtn');
+            const listContainer = document.getElementById('fullListContainer');
+            const namesGrid = document.getElementById('namesGrid');
+
+            // 初始化名單網格 (加上name-chip)
+            function renderNameChips() {
+                let htmlStr = '';
+                nameList.forEach(item => {
+                    htmlStr += `<div class="name-chip">${item.name} <span class="num">${item.number}</span></div>`;
+                });
+                namesGrid.innerHTML = htmlStr;
+            }
+            renderNameChips();
+
+            // 隨機選取函數
+            function pickRandomName() {
+                if (nameList.length === 0) {
+                    displayNameEl.textContent = '⚠️ 無名單';
+                    displayNumberEl.textContent = '編號 -';
+                    return;
+                }
+                const randomIndex = Math.floor(Math.random() * nameList.length);
+                const selected = nameList[randomIndex];
+                displayNameEl.textContent = selected.name;
+                displayNumberEl.textContent = `編號 ${selected.number}`;
+                // 加個小閃爍回饋 (視覺)
+                const area = document.getElementById('pickedArea');
+                area.style.background = '#fffbe6';
+                area.style.transition = 'background 0.1s';
+                setTimeout(() => {
+                    area.style.background = '#ffffffd6';
+                }, 120);
+            }
+
+            // 點擊按鈕抽選
+            pickBtn.addEventListener('click', () => {
+                pickRandomName();
+            });
+
+            // 自動先抽一次？ 可以預先顯示一個隨機 (可選) 讓畫面不空
+            // 但為了中立，可以在 DOM 載入後隨機選一個 (展現功能)
+            window.addEventListener('load', () => {
+                // 隨機挑選一位作為初始展示 (讓人不覺得單調)
+                pickRandomName();
+            });
+
+            // 摺疊/顯示名單
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = listContainer.classList.contains('collapsed');
+                if (isHidden) {
+                    listContainer.classList.remove('collapsed');
+                    toggleBtn.innerHTML = '📂 隱藏名單';
+                } else {
+                    listContainer.classList.add('collapsed');
+                    toggleBtn.innerHTML = '📋 顯示全部名單';
+                }
+            });
+
+            // 可選：鍵盤快捷 R 鍵抽選 (小彩蛋)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'r' || e.key === 'R') {
+                    // 避免與瀏覽器重新整理衝突 (但沒用ctrl/cmd)
+                    if (!e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();  // 單純防止按r不小心觸發某些瀏覽器動作
+                        pickRandomName();
+                    }
+                }
+            });
+
+            // 確保姓名顯示清楚，沒有多餘的點
+            // 所有顯示都是直接取自 name + number，沒加入任何點
+        })();
+    </script>
+</body>
+</html>

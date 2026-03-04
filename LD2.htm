@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>抽選 · 33人名單 (iPad優化)</title>
+    <style>
+        /* 全域重設 – 針對iPad觸控精準度與視覺舒適 */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;  /* 移除預設灰底 */
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(145deg, #e6eefa 0%, #cbd6e8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            /* 改善觸控響應 */
+            touch-action: manipulation;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 56px;
+            box-shadow: 0 25px 50px -10px rgba(0, 20, 40, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            width: min(750px, 100%);
+            padding: 2.2rem 1.8rem 2.5rem;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0a2342;
+            margin: 0 0 0.2rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+            padding-left: 0.2rem;
+        }
+
+        h1 span {
+            background: #1e3a5f;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 500;
+            padding: 0.2rem 1.4rem;
+            border-radius: 60px;
+            line-height: 1.6;
+        }
+
+        .subhead {
+            color: #2b4a6e;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin: 0 0 2rem 0;
+            border-left: 6px solid #8aadcc;
+            padding-left: 1.2rem;
+            background: rgba(255,255,255,0.4);
+            border-radius: 0 30px 30px 0;
+        }
+
+        /* 抽選結果卡片 — 加大留白 */
+        .picked-area {
+            background: #ffffff;
+            border-radius: 48px;
+            padding: 2.4rem 1rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            border: 2px solid #c2d6ec;
+            box-shadow: 0 12px 18px -8px rgba(30, 50, 70, 0.15);
+            transition: background 0.2s;
+        }
+
+        .picked-label {
+            font-size: 1rem;
+            letter-spacing: 4px;
+            color: #537a9f;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        #displayName {
+            font-size: 4.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #0b2b4a;
+            margin: 0.5rem 0 0.4rem;
+            word-break: break-word;
+        }
+
+        .number-badge {
+            display: inline-block;
+            background: #aac2de;
+            color: #102a41;
+            font-weight: 700;
+            font-size: 1.5rem;
+            padding: 0.5rem 2rem;
+            border-radius: 60px;
+            border: 2px solid white;
+            margin-top: 0.2rem;
+        }
+
+        /* ----- 巨型按鈕 (iPad手指友好) ----- */
+        .action-row {
+            display: flex;
+            justify-content: center;
+            margin: 2.2rem 0 1.8rem;
+        }
+
+        .pick-btn {
+            background: #1e3a5f;
+            border: none;
+            color: white;
+            font-size: 3rem;
+            font-weight: 600;
+            padding: 1.6rem 2rem;
+            border-radius: 100px;
+            box-shadow: 0 20px 30px -5px #0e2a44, 0 6px 0 #0b1d32;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.08s ease;
+            border: 3px solid #ffffffcc;
+            width: 100%;
+            max-width: 600px;
+            letter-spacing: 2px;
+            touch-action: manipulation;
+            -webkit-appearance: none;  /* 移除iOS預設按鈕樣式 */
+            appearance: none;
+            outline: none;
+            user-select: none;
+        }
+
+        /* 按壓效果 (更明顯) */
+        .pick-btn:active {
+            background: #143250;
+            transform: translateY(5px);
+            box-shadow: 0 14px 22px -5px #091b2c, 0 3px 0 #091b2c;
+        }
+
+        /* 確保點擊後不會有閃爍灰塊 */
+        .pick-btn:focus-visible {
+            outline: 4px solid #ffc107;
+            outline-offset: 4px;
+        }
+
+        /* 輔助按鈕 (顯示/隱藏) */
+        .list-toggle {
+            display: flex;
+            justify-content: center;
+            margin: 1.2rem 0 0.5rem;
+        }
+
+        .toggle-btn {
+            background: rgba(240, 248, 255, 0.9);
+            border: 2.5px solid #9bb1ca;
+            color: #1c3a5c;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 1rem 2.5rem;
+            border-radius: 70px;
+            cursor: pointer;
+            backdrop-filter: blur(3px);
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            width: auto;
+            min-width: 260px;
+            justify-content: center;
+            touch-action: manipulation;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .toggle-btn:active {
+            background: #d6e5ff;
+            transform: scale(0.98);
+        }
+
+        /* 名單容器 — 可捲動 */
+        .names-container {
+            background: #eef4fc;
+            border-radius: 48px;
+            padding: 0.2rem 1.5rem 0.5rem;
+            margin-top: 2rem;
+            border: 2px solid #bed3ec;
+            transition: 0.2s;
+        }
+
+        .names-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem 0.9rem;
+            justify-content: center;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 1.5rem 0.3rem 1.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: #9eb9d3 #dbe7f3;
+        }
+
+        /* iPad 捲軸粗細 */
+        .names-grid::-webkit-scrollbar {
+            width: 10px;
+        }
+        .names-grid::-webkit-scrollbar-track {
+            background: #dbe7f3;
+            border-radius: 20px;
+        }
+        .names-grid::-webkit-scrollbar-thumb {
+            background: #9eb9d3;
+            border-radius: 20px;
+            border: 2px solid #eef4fc;
+        }
+
+        .name-chip {
+            background: white;
+            border-radius: 60px;
+            padding: 0.7rem 1.4rem 0.7rem 1.8rem;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1.5px solid #b8cee7;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .name-chip .num {
+            font-weight: 700;
+            color: #264e7b;
+            background: #dde9f8;
+            border-radius: 40px;
+            padding: 0.2rem 0.9rem;
+            font-size: 1rem;
+            margin-left: 0.3rem;
+        }
+
+        .collapsed {
+            display: none;
+        }
+
+        .footer-note {
+            font-size: 1rem;
+            color: #406684;
+            text-align: center;
+            margin-top: 2.2rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        /* 針對小平板微調 */
+        @media (max-width: 500px) {
+            #displayName { font-size: 3.2rem; }
+            .pick-btn { font-size: 2.4rem; padding: 1.2rem 1.5rem; }
+            .toggle-btn { font-size: 1.3rem; padding: 0.8rem 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>
+            🎲 幸運抽選 · 
+            <span>33</span>
+        </h1>
+        <div class="subhead">33位朋友 · 一點即中</div>
+
+        <!-- 顯示抽中結果區域 -->
+        <div class="picked-area" id="pickedArea">
+            <div class="picked-label">本 次 抽 中</div>
+            <div id="displayName">—</div>
+            <div class="number-badge" id="displayNumber">編號</div>
+        </div>
+
+        <!-- 超大型按鈕：iPad 觸控最佳化 (無JavaScript事件阻礙) -->
+        <div class="action-row">
+            <button class="pick-btn" id="pickRandomBtn" type="button">
+                <span>🎯</span> 點我抽一位 <span>✨</span>
+            </button>
+        </div>
+
+        <!-- 顯示/隱藏完整名單 (保留原始資訊) -->
+        <div class="list-toggle">
+            <button class="toggle-btn" id="toggleListBtn" type="button">📋 顯示名單</button>
+        </div>
+
+        <!-- 名單總覽 (預設隱藏，節省空間) -->
+        <div id="fullListContainer" class="names-container collapsed">
+            <div class="names-grid" id="namesGrid"></div>
+        </div>
+
+        <div class="footer-note">手指輕點 · 隨機抽出</div>
+    </div>
+
+    <script>
+        (function() {
+            "use strict";
+
+            // ---------- 原始33筆資料 (依編號1~33) ----------
+            const nameList = [
+                { name: "歐叡甄", number: 1 },
+                { name: "陳芷萱", number: 2 },
+                { name: "鄭湣芝", number: 3 },
+                { name: "鄭詩蕊", number: 4 },
+                { name: "張文淵", number: 5 },
+                { name: "黃瑞妍", number: 6 },
+                { name: "洪學敏", number: 7 },
+                { name: "李汶靜", number: 8 },
+                { name: "梁梓彤", number: 9 },
+                { name: "李雅欣", number: 10 },
+                { name: "林倩瑜", number: 11 },
+                { name: "馬凱盈", number: 12 },
+                { name: "吳彥逸", number: 13 },
+                { name: "余婧瑤", number: 14 },
+                { name: "陳頌奇", number: 15 },
+                { name: "陳梓朗", number: 16 },
+                { name: "庄信南", number: 17 },
+                { name: "黃哲麟", number: 18 },
+                { name: "高唯峻", number: 19 },
+                { name: "官頌朗", number: 20 },
+                { name: "林偉誠", number: 21 },
+                { name: "李浚哲", number: 22 },
+                { name: "梁翰升", number: 23 },
+                { name: "林錦檳", number: 24 },
+                { name: "曾柏喬", number: 25 },
+                { name: "謝佑崇", number: 26 },
+                { name: "曹梓然", number: 27 },
+                { name: "黃晉逸", number: 28 },
+                { name: "黃啟博", number: 29 },
+                { name: "肖全凱", number: 30 },
+                { name: "葉咏天", number: 31 },
+                { name: "俞君來", number: 32 },
+                { name: "鄭瑋駿", number: 33 }
+            ];
+
+            // ----- DOM 元素 -----
+            const displayNameEl = document.getElementById('displayName');
+            const displayNumberEl = document.getElementById('displayNumber');
+            const pickBtn = document.getElementById('pickRandomBtn');
+            const toggleBtn = document.getElementById('toggleListBtn');
+            const listContainer = document.getElementById('fullListContainer');
+            const namesGrid = document.getElementById('namesGrid');
+
+            // ----- 建立名單標籤 (確保顯示乾淨，沒有點) -----
+            function buildNameChips() {
+                let html = '';
+                nameList.forEach(item => {
+                    html += `<div class="name-chip">${item.name} <span class="num">${item.number}</span></div>`;
+                });
+                namesGrid.innerHTML = html;
+            }
+            buildNameChips();
+
+            // ----- 隨機選取函數 (加上一點觸覺回饋) -----
+            function performRandomPick() {
+                if (!nameList.length) return;
+                const randomIndex = Math.floor(Math.random() * nameList.length);
+                const chosen = nameList[randomIndex];
+                displayNameEl.textContent = chosen.name;
+                displayNumberEl.textContent = `編號 ${chosen.number}`;
+
+                // 輕微背景閃爍，讓使用者知道已經觸發 (iPad視覺回饋)
+                const area = document.getElementById('pickedArea');
+                area.style.backgroundColor = '#fcf2dd';
+                area.style.transition = 'background-color 0.1s ease';
+                setTimeout(() => {
+                    area.style.backgroundColor = '#ffffff';
+                }, 130);
+            }
+
+            // ----- 綁定按鈕事件 (使用純click，對iPad最友善) -----
+            pickBtn.addEventListener('click', function (e) {
+                // 避免任何預設行為，但click本身沒有副作用
+                e.preventDefault(); 
+                performRandomPick();
+            });
+
+            // 如果希望觸摸時有更即時反應，也可加touch事件，但click在iPad已經夠快
+            // 為了避免300ms延遲？ 現代iOS早已取消延遲，且用click最穩。
+
+            // ----- 載入時隨機顯示一個名字 (不讓畫面空白) -----
+            window.addEventListener('load', function() {
+                performRandomPick();
+            });
+
+            // ----- 摺疊/顯示完整名單 (toggle) -----
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isCollapsed = listContainer.classList.contains('collapsed');
+                if (isCollapsed) {
+                    listContainer.classList.remove('collapsed');
+                    toggleBtn.innerHTML = '📂 隱藏名單';
+                } else {
+                    listContainer.classList.add('collapsed');
+                    toggleBtn.innerHTML = '📋 顯示名單';
+                }
+            });
+
+            // ----- 額外: 用手指滑動時絕不誤觸發，不需特別處理 -----
+            // 防止雙擊縮放干擾 (optional)
+            document.addEventListener('touchstart', (e) => {
+                // 不做任何事情，保持原生行為
+            }, { passive: true });
+
+            // 增加一點安全性：若在iPad上點擊按鈕時觸發多次，確保只執行一次
+            // 已經用preventDefault不會有雙重事件
+        })();
+    </script>
+</body>
+</html>
