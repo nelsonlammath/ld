@@ -294,7 +294,7 @@
 
         <!-- 顯示/隱藏完整名單 (保留原始資訊) -->
         <div class="list-toggle">
-            <button class="toggle-btn" id="toggleListBtn" type="button">📋 show complete name list</button>
+            <button class="toggle-btn" id="toggleListBtn" type="button">📋 show name list</button>
         </div>
 
         <!-- 名單總覽 (預設隱藏，節省空間) -->
@@ -402,10 +402,10 @@
                 const isCollapsed = listContainer.classList.contains('collapsed');
                 if (isCollapsed) {
                     listContainer.classList.remove('collapsed');
-                    toggleBtn.innerHTML = '📂 隱藏名單';
+                    toggleBtn.innerHTML = '📂 hide name list';
                 } else {
                     listContainer.classList.add('collapsed');
-                    toggleBtn.innerHTML = '📋 顯示名單';
+                    toggleBtn.innerHTML = '📋 show name list';
                 }
             });
 
